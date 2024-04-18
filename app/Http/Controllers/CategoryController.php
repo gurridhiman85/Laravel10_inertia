@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
@@ -80,5 +81,12 @@ class CategoryController extends Controller
         $category->delete();
         return redirect()->route('category.index');
 
+    }
+
+    public function search(Request $request){
+        $categories = Category::where('name', 'like', '%'.$request->input('search').'%')->get();
+        return Inertia::render('Category/Index', [
+            'categories' => $categories,
+        ]);
     }
 }

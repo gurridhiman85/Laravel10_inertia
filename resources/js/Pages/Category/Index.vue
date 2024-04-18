@@ -4,11 +4,24 @@
     import CustomButton from '../../Components/CustomButton.vue';
     import CustomDangerButton from '../../Components/CustomDangerButton.vue';
     import VueSweetalert2 from 'vue-sweetalert2';
+    import { ref, watch } from "vue";
+    import { router } from '@inertiajs/vue3'
     defineProps({
         categories: {
             type: Array,
             default: () => [],
         },
+    });
+
+    let search = ref('');
+    watch(search, (value) => {
+        router.get(
+            route('category.search'),
+            { search: value },
+            {
+                preserveState: true,
+            }
+        );
     });
 
 </script>
@@ -32,6 +45,14 @@
 
 
                     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                        <div class="mb-2">
+                            <input
+                                    type="text"
+                                    v-model="search"
+                                    placeholder="Search..."
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-60 p-2 m-2 float-right"
+                            />
+                        </div>
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
@@ -51,7 +72,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-for="category in categories" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                            <tr v-if="categories.length" v-for="category in categories" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
 
                                 <td class="px-6 py-4">
                                     {{ category.id }}
@@ -71,6 +92,13 @@
 
 
 
+                                </td>
+                            </tr>
+
+                            <tr v-else class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+
+                                <td class="px-6 py-4 text-center" colspan="4">
+                                    No record found
                                 </td>
                             </tr>
                             </tbody>
