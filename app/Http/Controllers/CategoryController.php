@@ -6,18 +6,24 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Inertia\Inertia;
+use Auth;
 
 class CategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::get();
+        $query = Category::query();
+        if($request->input('search')){
+            $query->where('name', 'like', '%'.$request->input('search').'%');
+        }
+
+        $categories = $query->orderByDesc('id')->get();
 
         return Inertia::render('Category/Index', [
-            'categories' => $categories,
+            'categories' => $categories
         ]);
     }
 
@@ -83,10 +89,26 @@ class CategoryController extends Controller
 
     }
 
-    public function search(Request $request){
-        $categories = Category::where('name', 'like', '%'.$request->input('search').'%')->get();
-        return Inertia::render('Category/Index', [
-            'categories' => $categories,
-        ]);
+    public function download(Request $request){
+        $query = Category::query();
+        if($request->input('search')){
+            $query->where('name', 'like', '%'.$request->input('search').'%');
+        }
+
+        $categories = $query->orderByDesc('id')->get();
+
+        $pdf = app('dompdf.wrapper');
+        $pdf->getDomPDF()->set_option("enable_php", true);
+
+        $path = public_path() . '/categories.pdf';
+
+        $username = Auth::user()->name;
+        $pdf = $pdf->loadView('report', compact('categories', 'username'));
+
+        $pdf->save($path);
+
+        $pdf->setOption('javascript-delay', 3000);
+        return response()->download($path);
+
     }
 }
